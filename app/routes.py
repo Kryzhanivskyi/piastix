@@ -11,13 +11,14 @@ from datetime import datetime
 @app.route('/')
 @app.route('/index')
 def index():
-    connection = psycopg2.connect('postgres://yyigglgedkjamf:4005d027222aea85a71ecf05179657a00c092ebf39ac3af7207fc03e07456d39@ec2-107-21-248-200.compute-1.amazonaws.com:5432/d68q1rlffi76s9')
-    cursor = connection.cursor()
-    cursor.execute('SELECT * FROM currency')
-    db_list = cursor.fetchall()
-    currency_list = []
-    for currency in db_list:
-        currency_list.append(currency[1])
+    # connection = psycopg2.connect('postgresql://admin:admin@localhost/piastix')
+    # cursor = connection.cursor()
+    # cursor.execute('SELECT * FROM currency')
+    # db_list = cursor.fetchall()
+    # currency_list = []
+    # for currency in db_list:
+    #     currency_list.append(currency[1])
+    currency_list = ['EUR', 'USD', 'RUB']
     return render_template('index.html', currencies=currency_list)
 
 
@@ -35,7 +36,7 @@ def make_payment():
         signature = hashlib.sha256(srt_to_hash.encode()).hexdigest()
         context = {"amount": amount, "currency": currency_code, "shop_id": shop_id, "sign": signature,
                    "shop_order_id": shop_order_id, "description": description}
-        connection = psycopg2.connect('postgresql://admin:admin@localhost/piastix')
+        connection = psycopg2.connect('postgres://yyigglgedkjamf:4005d027222aea85a71ecf05179657a00c092ebf39ac3af7207fc03e07456d39@ec2-107-21-248-200.compute-1.amazonaws.com:5432/d68q1rlffi76s9')
         cursor = connection.cursor()
         postgres_insert_query = """ INSERT INTO payment (currency_id, amount, description, uid_code, payment_sending_time) VALUES (%s,%s,%s,%s,%s)"""
         record_to_insert = (1, float(amount), description, str(uuid.uuid4()), datetime.utcnow())
@@ -62,7 +63,7 @@ def make_payment():
         json_response = response.json()
         result = json_response.get('result')
         if result:
-            connection = psycopg2.connect('postgresql://admin:admin@localhost/piastix')
+            connection = psycopg2.connect('postgres://yyigglgedkjamf:4005d027222aea85a71ecf05179657a00c092ebf39ac3af7207fc03e07456d39@ec2-107-21-248-200.compute-1.amazonaws.com:5432/d68q1rlffi76s9')
             cursor = connection.cursor()
             postgres_insert_query = """ INSERT INTO payment (currency_id, amount, description, uid_code, payment_sending_time) VALUES (%s,%s,%s,%s,%s)"""
             record_to_insert = (2, float(amount), description, str(uuid.uuid4()), datetime.utcnow())
@@ -110,7 +111,7 @@ def make_payment():
             referer = response_data['referer']
             context = {"method": method, "url": url, "lang": lang, "m_curorderid": m_curorderid,
                        "m_historyid": m_historyid, "m_historytm": m_historytm, "referer": referer}
-            connection = psycopg2.connect('postgresql://admin:admin@localhost/piastix')
+            connection = psycopg2.connect('postgres://yyigglgedkjamf:4005d027222aea85a71ecf05179657a00c092ebf39ac3af7207fc03e07456d39@ec2-107-21-248-200.compute-1.amazonaws.com:5432/d68q1rlffi76s9')
             cursor = connection.cursor()
             postgres_insert_query = """ INSERT INTO payment (currency_id, amount, description, uid_code, payment_sending_time) VALUES (%s,%s,%s,%s,%s)"""
             record_to_insert = (3, float(amount), description, str(uuid.uuid4()), datetime.utcnow())
@@ -132,7 +133,7 @@ def make_payment():
 
 @app.route('/report')
 def report():
-    connection = psycopg2.connect('postgresql://admin:admin@localhost/piastix')
+    connection = psycopg2.connect('postgres://yyigglgedkjamf:4005d027222aea85a71ecf05179657a00c092ebf39ac3af7207fc03e07456d39@ec2-107-21-248-200.compute-1.amazonaws.com:5432/d68q1rlffi76s9')
     cursor = connection.cursor()
     cursor.execute('SELECT * FROM payment')
     db_list = cursor.fetchall()
