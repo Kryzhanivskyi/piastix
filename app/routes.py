@@ -1,9 +1,11 @@
 from app import app
+from config import Config
 from flask import render_template, request, redirect
 import json
 import requests
 import hashlib
 import sqlite3
+import psycopg2
 import uuid
 from datetime import datetime
 
@@ -11,10 +13,10 @@ from datetime import datetime
 @app.route('/')
 @app.route('/index')
 def index():
-    connection = sqlite3.connect('app.db')
-    conn = connection.cursor()
-    conn.execute('SELECT * FROM currency')
-    db_list = conn.fetchall()
+    connection = psycopg2.connect('postgresql://admin:admin@localhost/piastix')
+    cursor = connection.cursor()
+    cursor.execute('SELECT * FROM currency')
+    db_list = cursor.fetchall()
     currency_list = []
     for currency in db_list:
         currency_list.append(currency[1])
@@ -35,11 +37,12 @@ def make_payment():
         signature = hashlib.sha256(srt_to_hash.encode()).hexdigest()
         context = {"amount": amount, "currency": currency_code, "shop_id": shop_id, "sign": signature,
                    "shop_order_id": shop_order_id, "description": description}
-        con = sqlite3.connect('app.db')
-        c = con.cursor()
-        c.execute("INSERT INTO payment (currency_id, amount, description, uid_code, payment_sending_time)"
-                  "VALUES (?,?,?,?,?)", (1, float(amount), description, str(uuid.uuid4()), datetime.utcnow()))
-        con.commit()
+        connection = psycopg2.connect('postgresql://admin:admin@localhost/piastix')
+        cursor = connection.cursor()
+        postgres_insert_query = """ INSERT INTO payment (currency_id, amount, description, uid_code, payment_sending_time) VALUES (%s,%s,%s,%s,%s)"""
+        record_to_insert = (1, float(amount), description, str(uuid.uuid4()), datetime.utcnow())
+        cursor.execute(postgres_insert_query, record_to_insert)
+        connection.commit()
         return render_template('piastrix.html', **context)
     elif currency == "USD":
         payer_currency = 840
@@ -61,11 +64,12 @@ def make_payment():
         json_response = response.json()
         result = json_response.get('result')
         if result:
-            con = sqlite3.connect('app.db')
-            c = con.cursor()
-            c.execute("INSERT INTO payment (currency_id, amount, description, uid_code, payment_sending_time)"
-                      "VALUES (?,?,?,?,?)", (2, float(amount), description, str(uuid.uuid4()), datetime.utcnow()))
-            con.commit()
+            connection = psycopg2.connect('postgresql://admin:admin@localhost/piastix')
+            cursor = connection.cursor()
+            postgres_insert_query = """ INSERT INTO payment (currency_id, amount, description, uid_code, payment_sending_time) VALUES (%s,%s,%s,%s,%s)"""
+            record_to_insert = (2, float(amount), description, str(uuid.uuid4()), datetime.utcnow())
+            cursor.execute(postgres_insert_query, record_to_insert)
+            connection.commit()
             return redirect(json_response['data']['url'])
         else:
             data = {
@@ -108,12 +112,12 @@ def make_payment():
             referer = response_data['referer']
             context = {"method": method, "url": url, "lang": lang, "m_curorderid": m_curorderid,
                        "m_historyid": m_historyid, "m_historytm": m_historytm, "referer": referer}
-
-            con = sqlite3.connect('app.db')
-            c = con.cursor()
-            c.execute("INSERT INTO payment (currency_id, amount, description, uid_code, payment_sending_time)"
-                      "VALUES (?,?,?,?,?)", (3, float(amount), description, str(uuid.uuid4()), datetime.utcnow()))
-            con.commit()
+            connection = psycopg2.connect('postgresql://admin:admin@localhost/piastix')
+            cursor = connection.cursor()
+            postgres_insert_query = """ INSERT INTO payment (currency_id, amount, description, uid_code, payment_sending_time) VALUES (%s,%s,%s,%s,%s)"""
+            record_to_insert = (3, float(amount), description, str(uuid.uuid4()), datetime.utcnow())
+            cursor.execute(postgres_insert_query, record_to_insert)
+            connection.commit()
             return render_template('invoice.html', **context)
         else:
             data = {
@@ -130,17 +134,17 @@ def make_payment():
 
 @app.route('/report')
 def report():
-    connection = sqlite3.connect('app.db')
-    conn = connection.cursor()
-    conn.execute('SELECT * FROM payment')
-    db_list = conn.fetchall()
+    connection = psycopg2.connect('postgresql://admin:admin@localhost/piastix')
+    cursor = connection.cursor()
+    cursor.execute('SELECT * FROM payment')
+    db_list = cursor.fetchall()
     data = []
     for item in db_list:
         cursor_dict = {
             'id': item[0],
             'currency_id': item[1],
             'amount': item[2],
-            'payment_sending_time': item[3],
+            'payment_sending_time': datetime.strftime(item[3], "%Y-%m-%d %H:%m:%s"),
             'description': item[4],
             'uid_code': item[5]
         }
