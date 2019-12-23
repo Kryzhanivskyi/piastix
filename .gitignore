@@ -1,0 +1,6 @@
+.piastix_venv/
+pycache/
+*.pyc
+app.db
+.idea/
+.static/piastix_venv/

@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Invoice</title>
+</head>
+<body>
+<form method="{{ method }}" hidden action="{{ url }}">
+    <input name="lang" value="{{ lang }}" />
+    <input name="m_curorderid" value="{{ m_curorderid }}"/>
+    <input name="m_historyid" value="{{ m_historyid }}"/>
+    <input name="m_historytm" value="{{ m_historytm }}"/>
+    <input name="referer" value="{{ referer }}"/>
+    <input type="submit" id="rub_btn"/>
+</form>
+<script>
+    window.onload=function(){
+      document.getElementById("rub_btn").click();
+    };
+</script>
+</body>
+</html>

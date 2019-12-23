@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Payment</title>
+</head>
+<body>
+<h2>Оплата:</h2>
+<form method="post" action="/make_payment">
+    Сумма оплаты:
+    <br><input type="number" step="0.01" min="0" name="amount"><br><br>
+    Валюта оплаты:
+    <br><select name="currency" method="GET" action="/">
+        {% for currency in currencies %}
+        <option value= "{{currency}}" SELECTED>{{currency}}</option>"
+        {% endfor %}
+    </select><br><br>
+    Описание товара:
+    <br><textarea name="description"></textarea><br><br>
+    <button type="submit">Оплатить</button>
+</form>
+</body>
+</html>
