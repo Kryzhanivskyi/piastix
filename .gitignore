@@ -1,4 +1,4 @@
-.piastix_venv/
+.piastix_venv/*
 pycache/
 *.pyc
 app.db
