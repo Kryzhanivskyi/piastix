@@ -1,10 +1,8 @@
 from app import app
-from config import Config
 from flask import render_template, request, redirect
 import json
 import requests
 import hashlib
-import sqlite3
 import psycopg2
 import uuid
 from datetime import datetime
@@ -13,7 +11,7 @@ from datetime import datetime
 @app.route('/')
 @app.route('/index')
 def index():
-    connection = psycopg2.connect('postgresql://admin:admin@localhost/piastix')
+    connection = psycopg2.connect('postgres://yyigglgedkjamf:4005d027222aea85a71ecf05179657a00c092ebf39ac3af7207fc03e07456d39@ec2-107-21-248-200.compute-1.amazonaws.com:5432/d68q1rlffi76s9')
     cursor = connection.cursor()
     cursor.execute('SELECT * FROM currency')
     db_list = cursor.fetchall()
